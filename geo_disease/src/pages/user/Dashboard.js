@@ -1,5 +1,6 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import axios from 'axios';
+import API_BASE_URL from '../../config/api';
 import { 
   AreaChart, 
   Area, 
@@ -15,12 +16,10 @@ import {
   Bar
 } from 'recharts';
 import { 
-  TrendingUp, 
   Users, 
   Activity, 
   ShieldCheck, 
   Clock, 
-  ChevronRight,
   Database,
   FileBarChart,
   AlertCircle,
@@ -29,7 +28,6 @@ import {
   HeartPulse,
   BellRing,
   MapPin,
-  Stethoscope,
   Droplets,
   Scale,
   Target,
@@ -66,31 +64,31 @@ const DashboardAdmin = ({ dataPasien = [], logs = [], daftarKecamatan = [], setA
   useEffect(() => {
     const fetchOperationalData = async () => {
       try {
-        const borRes = await axios.get('http://127.0.0.1:5000/api/bor');
+        const borRes = await axios.get(`${API_BASE_URL}/api/bor`);
         if (borRes.data && borRes.data.success) {
           setLiveBOR(borRes.data.data);
           setRekomendasiRS(borRes.data.rekomendasi);
         }
         
-        const ewsRes = await axios.get('http://127.0.0.1:5000/api/ews-logs');
+        const ewsRes = await axios.get(`${API_BASE_URL}/api/ews-logs`);
         if (ewsRes.data && ewsRes.data.success) {
           setEwsLogs(ewsRes.data.logs.slice(0, 5)); 
         }
 
         // Fetch DMF-T Data
-        const dmftRes = await axios.get('http://127.0.0.1:5000/api/dmft');
+        const dmftRes = await axios.get(`${API_BASE_URL}/api/dmft`);
         if (dmftRes.data && typeof dmftRes.data === 'object') {
           setDmftData(dmftRes.data);
         }
 
         // Fetch Program Intervensi CKG
-        const programRes = await axios.get('http://127.0.0.1:5000/api/program-ckg');
+        const programRes = await axios.get(`${API_BASE_URL}/api/program-ckg`);
         if (programRes.data && Array.isArray(programRes.data)) {
           setProgramIntervensi(programRes.data.slice(0, 3));
         }
 
         // Fetch Aktivitas Tim
-        const aktivitasRes = await axios.get('http://127.0.0.1:5000/api/aktivitas-tim');
+        const aktivitasRes = await axios.get(`${API_BASE_URL}/api/aktivitas-tim`);
         if (aktivitasRes.data && Array.isArray(aktivitasRes.data)) {
           setAktivitasTim(aktivitasRes.data.slice(0, 3));
         }

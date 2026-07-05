@@ -1,0 +1,34 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "geo_disease/package.json",
+      "use": "@vercel/static-build",
+      "config": {
+        "distDir": "build"
+      }
+    },
+    {
+      "src": "api/app.py",
+      "use": "@vercel/python"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/api/(.*)",
+      "dest": "/api/app.py"
+    },
+    {
+      "src": "/static/(.*)",
+      "dest": "/geo_disease/build/static/$1"
+    },
+    {
+      "src": "/(.*\\.(js|css|ico|png|jpg|jpeg|svg|json|txt|woff|woff2|ttf|eot))",
+      "dest": "/geo_disease/build/$1"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/geo_disease/build/index.html"
+    }
+  ]
+}

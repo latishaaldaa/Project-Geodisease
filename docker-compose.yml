@@ -1,0 +1,33 @@
+version: '3.8'
+
+services:
+  backend:
+    build: ./backend
+    container_name: geodisease-backend
+    ports:
+      - "5000:5000"
+    environment:
+      # Set DATABASE_URL sesuai dengan kredensial MySQL hosting Anda
+      - DATABASE_URL=mysql+pymysql://username:password@hostname:3306/database_name
+      # Contoh: DATABASE_URL=mysql+pymysql://geodisease_user:SecurePass@mysql.hosting.com:3306/geodisease_db
+    restart: unless-stopped
+    networks:
+      - geodisease-network
+
+  frontend:
+    build: 
+      context: ./geo_disease
+      args:
+        - REACT_APP_API_URL=http://your-backend-url:5000
+    container_name: geodisease-frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    restart: unless-stopped
+    networks:
+      - geodisease-network
+
+networks:
+  geodisease-network:
+    driver: bridge

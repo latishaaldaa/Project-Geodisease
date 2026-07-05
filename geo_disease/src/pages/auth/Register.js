@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import logoGeoDisease from '../../assets/GeoDisease.png'; 
+import API_BASE_URL from '../../config/api'; 
 
 const Register = ({ onBackToLogin }) => {
   const [nama, setNama] = useState('');
@@ -19,7 +20,7 @@ const Register = ({ onBackToLogin }) => {
     }
 
     try {
-      const response = await fetch('http://127.0.0.1:5000/api/register', {
+      const response = await fetch(`${API_BASE_URL}/api/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 

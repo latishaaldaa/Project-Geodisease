@@ -13,7 +13,6 @@ const AuditLog = ({ auditLogs = [] }) => {
 
   // Kategori aksi untuk filtering
   const aksiCategories = ['Semua', 'CREATE', 'UPDATE', 'DELETE', 'LOGIN', 'LOGOUT', 'VIEW', 'EXPORT', 'APPROVE', 'REJECT'];
-  const statusCategories = ['Semua', 'Success', 'Failed', 'Warning', 'Info'];
 
   // Filter dan search audit logs
   const filteredLogs = useMemo(() => {

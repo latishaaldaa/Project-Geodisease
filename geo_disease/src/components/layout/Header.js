@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Bell, ChevronDown, Wifi, WifiOff, Activity } from 'lucide-react';
+import API_BASE_URL from '../../config/api';
 
 const Header = ({ userRole, activeTab }) => {
   const [isOnline, setIsOnline] = useState(true);
@@ -10,7 +11,7 @@ const Header = ({ userRole, activeTab }) => {
     const checkConnection = async () => {
       try {
         // Memanggil API ringan untuk cek apakah backend aktif
-        await axios.get('http://127.0.0.1:5000/api/pasien');
+        await axios.get(`${API_BASE_URL}/api/pasien`);
         setIsOnline(true);
       } catch (error) {
         setIsOnline(false);

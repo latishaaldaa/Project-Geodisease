@@ -1,9 +1,10 @@
 import React, { useState, useMemo } from 'react';
 import axios from 'axios';
+import API_BASE_URL from '../../config/api';
 import { 
   ClipboardList, FileText, Stethoscope, Dna, BarChart3, 
   MapPin, Pill, Book, Link2, Brain, User, Save, RotateCcw,
-  Lightbulb, Microscope, AlertTriangle, Circle, Heart, Droplet, Scale, Zap
+  Lightbulb, Microscope, Circle, Heart, Droplet, Scale, Zap
 } from 'lucide-react';
 
 // =============================================================================
@@ -562,7 +563,7 @@ const CKGratis = ({ userName, daftarKecamatan, refreshData, addLog }) => {
         berat: parseInt(pemeriksaan.berat) || 0,
       };
 
-      const response = await axios.post('http://127.0.0.1:5000/api/pasien', payload);
+      const response = await axios.post(`${API_BASE_URL}/api/pasien`, payload);
 
       if (response.status === 201 || response.data) {
         
@@ -590,7 +591,7 @@ const CKGratis = ({ userName, daftarKecamatan, refreshData, addLog }) => {
             last_updated_by: userName || 'Tim CKG'
           };
 
-          await axios.post('http://127.0.0.1:5000/api/penyakit', payloadPenyakit);
+          await axios.post(`${API_BASE_URL}/api/penyakit`, payloadPenyakit);
           console.log('✅ Penyakit berhasil ditambahkan ke Katalog Diagnosa dengan data lengkap');
         } catch (errorPenyakit) {
           // Jika gagal (mungkin sudah ada), coba update

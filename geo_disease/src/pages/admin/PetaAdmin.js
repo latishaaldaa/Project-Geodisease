@@ -16,10 +16,10 @@ import {
   Calendar,
   AlertCircle,
   AlertTriangle,
-  Thermometer,
-  Heart,
-  Home
+  Home,
+  FileDown
 } from 'lucide-react';
+import { exportToExcel } from '../../utils/excelHelper';
 
 // KOORDINAT UTAMA KECAMATAN DI KABUPATEN MADIUN
 const koordinatFaskesMadiun = {
@@ -115,11 +115,33 @@ const PetaAdmin = ({ dataPasien = [], dataPenyakit = [], daftarKecamatan = [], r
   const icuAktif = filteredPasien.filter(p => p.status === 'ICU').length;
   const sembuhCount = filteredPasien.filter(p => p.status === 'Sembuh').length;
 
+  // --- FUNGSI EXPORT PETA ---
+  const handleExportPeta = () => {
+    const exportData = filteredPasien.map((p, idx) => ({
+      No: idx + 1,
+      'Nama Pasien': p.nama,
+      'NIK': p.nik || '-',
+      'Umur': p.umur,
+      'Wilayah Kecamatan': p.wilayah_id,
+      'Alamat': p.alamat || '-',
+      'Latitude': p.latitude || '-',
+      'Longitude': p.longitude || '-',
+      'Diagnosa': p.penyakit_id,
+      'Bangsal/Kamar': p.kamar || '-',
+      'Status Medis': p.status,
+      'Suhu (°C)': p.suhu || '-',
+      'Tekanan Darah': p.tensi || '-',
+      'Denyut Nadi': p.nadi || '-',
+      'Tanggal Input': p.tanggal_input
+    }));
+    exportToExcel(exportData, `Peta_Rujukan_${selectedKec}`);
+  };
+
   return (
     <div className="flex flex-col gap-6 p-1 bg-slate-50 antialiased">
       
       {/* 1. FILTERING PANEL */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 bg-white p-4 rounded-3xl shadow-sm border border-slate-100">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 bg-white p-4 rounded-3xl shadow-sm border border-slate-100">
         {/* Filter Wilayah Rujukan */}
         <div className="flex flex-col justify-center">
           <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1.5 ml-1">Kecamatan Asal Rujukan</label>
@@ -165,6 +187,17 @@ const PetaAdmin = ({ dataPasien = [], dataPenyakit = [], daftarKecamatan = [], r
             <option value="Sembuh">Sembuh / Discharge</option>
             <option value="Meninggal">Meninggal Dunia</option>
           </select>
+        </div>
+
+        {/* Export Button */}
+        <div className="flex flex-col justify-end">
+          <button
+            onClick={handleExportPeta}
+            className="w-full bg-emerald-50 text-emerald-700 border border-emerald-100 rounded-xl px-3 py-2.5 text-xs font-bold hover:bg-emerald-100 transition-all flex items-center justify-center gap-2"
+          >
+            <FileDown size={14} />
+            Export Data
+          </button>
         </div>
       </div>
 

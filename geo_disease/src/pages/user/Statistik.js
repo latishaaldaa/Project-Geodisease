@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useRef } from 'react';
 import { 
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, 
-  PieChart, Pie, Cell, BarChart, Bar, Legend
+  PieChart, Pie, Cell, BarChart, Bar
 } from 'recharts';
 import { 
   Activity, Users, TrendingUp, RefreshCw, HeartPulse, 
@@ -9,7 +9,6 @@ import {
   Droplets, Scale, AlertTriangle, UserCheck, ArrowUpRight,
   Thermometer, Pill, ClipboardList
 } from 'lucide-react';
-import html2canvas from 'html2canvas';
 import { jsPDF } from 'jspdf';
 import 'jspdf-autotable';
 

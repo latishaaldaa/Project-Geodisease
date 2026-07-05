@@ -2,12 +2,13 @@ import React, { useMemo, useState } from 'react';
 import { 
   Activity, Users, HeartPulse, MapPin, TrendingUp, 
   Clock, AlertCircle, ChevronRight, Filter, ShieldAlert,
-  BedDouble, Stethoscope, ShieldCheck, Ambulance, HelpCircle
+  BedDouble, Stethoscope, ShieldCheck, Ambulance, FileDown
 } from 'lucide-react';
 import { 
   AreaChart, Area, XAxis, YAxis, CartesianGrid, 
   Tooltip, ResponsiveContainer, BarChart, Bar, PieChart, Pie, Cell
 } from 'recharts';
+import { exportToExcel } from '../../utils/excelHelper';
 
 const DashboardAdmin = ({ dataPasien = [], logs = [], setActiveTab }) => {
   // --- STATE FILTER DYNAMIC ---
@@ -46,14 +47,6 @@ const DashboardAdmin = ({ dataPasien = [], logs = [], setActiveTab }) => {
 
   const meninggal = useMemo(() => {
     return dataPasien.filter(p => (p.status?.toLowerCase() || '') === 'meninggal').length;
-  }, [dataPasien]);
-
-  // Pasien Aktif di RS (Rawat Inap + ICU + IGD/Perawatan)
-  const pasienAktifRS = useMemo(() => {
-    return dataPasien.filter(p => {
-      const status = p.status?.toLowerCase() || '';
-      return status !== 'sembuh' && status !== 'meninggal';
-    }).length;
   }, [dataPasien]);
 
   // Bed Occupancy Rate (BOR) = (Pasien Rawat Inap + ICU) / Total Kapasitas Bed * 100
@@ -129,6 +122,27 @@ const DashboardAdmin = ({ dataPasien = [], logs = [], setActiveTab }) => {
       .slice(0, 4);
   }, [dataPasien]);
 
+  // --- FUNGSI EXPORT DATA DASHBOARD ---
+  const handleExportDashboard = () => {
+    const exportData = dataPasien.map((p, idx) => ({
+      No: idx + 1,
+      'Nama Pasien': p.nama,
+      'NIK': p.nik || '-',
+      'Umur': p.umur,
+      'Jenis Kelamin': p.jenis_kelamin || '-',
+      'Gol. Darah': p.gol_darah,
+      'Wilayah Kecamatan': p.wilayah_id,
+      'Diagnosa': p.penyakit_id,
+      'Bangsal/Kamar': p.kamar || '-',
+      'Status Medis': p.status,
+      'Suhu (°C)': p.suhu || '-',
+      'Tekanan Darah': p.tensi || '-',
+      'Denyut Nadi': p.nadi || '-',
+      'Tanggal Input': p.tanggal_input
+    }));
+    exportToExcel(exportData, 'Dashboard_Monitoring_Rumah_Sakit');
+  };
+
   // --- KAPASITAS BANGSAL RS ---
   const bangsalKapasitas = useMemo(() => {
     // Menghitung hunian bangsal secara dinamis
@@ -167,7 +181,7 @@ const DashboardAdmin = ({ dataPasien = [], logs = [], setActiveTab }) => {
       { name: 'Bangsal Dahlia', terisi: counts['Dahlia (Rawat Inap)'], kapasitas: 50, warna: 'bg-indigo-500' },
       { name: 'Unit Gawat Darurat (IGD)', terisi: counts['IGD'], kapasitas: 35, warna: 'bg-emerald-500' }
     ];
-  }, [dataPasien, icu, rawatInap]);
+  }, [dataPasien, icu]);
 
   return (
     <div className="p-8 space-y-8 animate-in fade-in duration-700 text-slate-800">
@@ -198,6 +212,15 @@ const DashboardAdmin = ({ dataPasien = [], logs = [], setActiveTab }) => {
               <option value="Meninggal">Meninggal</option>
             </select>
           </div>
+
+          <button
+            onClick={handleExportDashboard}
+            className="flex items-center gap-2 bg-emerald-50 text-emerald-700 border border-emerald-100 p-2 px-3 rounded-xl shadow-sm text-xs font-bold hover:bg-emerald-100 transition-all"
+            title="Export Data Dashboard"
+          >
+            <FileDown size={14} />
+            <span>Export</span>
+          </button>
 
           <div className="flex items-center gap-3 bg-white p-2 px-4 rounded-2xl border border-slate-100 shadow-sm">
             <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></div>

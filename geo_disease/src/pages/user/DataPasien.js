@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import axios from 'axios';
+import API_BASE_URL from '../../config/api';
 import { 
   FileDown, 
   FileUp, 
@@ -62,7 +63,7 @@ const DataPasien = ({ dataPenyakit = [], daftarKecamatan = [], refreshData, role
   const fetchPasien = async () => {
     try {
       setLoading(true);
-      const response = await axios.get('http://127.0.0.1:5000/api/pasien');
+      const response = await axios.get(`${API_BASE_URL}/api/pasien`);
       console.log('Fetched pasien data from API:', response.data);
       if (response.data.length > 0) {
         console.log('Sample first patient data:', response.data[0]);
@@ -229,10 +230,10 @@ const DataPasien = ({ dataPenyakit = [], daftarKecamatan = [], refreshData, role
     e.preventDefault();
     try {
       if (isEditMode && selectedPasien) {
-        await axios.put(`http://127.0.0.1:5000/api/pasien/${selectedPasien.id}`, formData);
+        await axios.put(`${API_BASE_URL}/api/pasien/${selectedPasien.id}`, formData);
         if (addLog) addLog("Perbarui Pasien", `Mengubah data klinis pasien atas nama ${formData.nama}`);
       } else {
-        await axios.post('http://127.0.0.1:5000/api/pasien', formData);
+        await axios.post(`${API_BASE_URL}/api/pasien`, formData);
         if (addLog) addLog("Tambah Pasien", `Berhasil mendaftarkan pasien baru atas nama ${formData.nama}`);
       }
       fetchPasien();
@@ -250,7 +251,7 @@ const DataPasien = ({ dataPenyakit = [], daftarKecamatan = [], refreshData, role
 
     if (window.confirm(`Apakah Anda yakin ingin menghapus data pasien ${namaPasien} secara permanen?`)) {
       try {
-        await axios.delete(`http://127.0.0.1:5000/api/pasien/${id}`);
+        await axios.delete(`${API_BASE_URL}/api/pasien/${id}`);
         if (addLog) addLog("Hapus Pasien", `Menghapus data rekam medis pasien atas nama ${namaPasien}`);
         fetchPasien();
         if (refreshData) refreshData();
@@ -373,7 +374,7 @@ const DataPasien = ({ dataPenyakit = [], daftarKecamatan = [], refreshData, role
           });
           console.log('Full posting data:', pasienData);
           console.log('======================');
-          await axios.post('http://127.0.0.1:5000/api/pasien', pasienData);
+          await axios.post(`${API_BASE_URL}/api/pasien`, pasienData);
           successCount++;
         } catch (rowError) {
           console.error('Error importing row:', row, rowError);

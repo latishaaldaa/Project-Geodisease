@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { 
   Search, 
   Plus, 
@@ -24,13 +24,10 @@ import {
   Download,
   UserPlus,
   Save,
-  Camera,
   MapPin,
   Clock,
   FileText,
-  Eye,
-  CheckCircle,
-  XCircle
+  Eye
 } from 'lucide-react';
 import axios from 'axios';
 
@@ -213,24 +210,8 @@ const KatalogDiagnosa = ({ dataPenyakit = [], refreshData }) => {
     }
   };
 
-  // FUNGSI BARU: Load Data Pemeriksaan dari LocalStorage
-  const loadDataPemeriksaan = () => {
-    try {
-      const storedData = localStorage.getItem('dataPemeriksaanCKG');
-      if (storedData) {
-        const parsed = JSON.parse(storedData);
-        setDataPemeriksaan(parsed);
-        
-        // Update DMF-T data berdasarkan data pemeriksaan real
-        updateDMFTFromPemeriksaan(parsed);
-      }
-    } catch (error) {
-      console.error("Gagal memuat data pemeriksaan dari localStorage:", error);
-    }
-  };
-
   // FUNGSI BARU: Update DMF-T berdasarkan data pemeriksaan real
-  const updateDMFTFromPemeriksaan = (dataPemeriksaan) => {
+  const updateDMFTFromPemeriksaan = useCallback((dataPemeriksaan) => {
     const dmftByPuskesmas = {};
     
     dataPemeriksaan.forEach(item => {
@@ -250,32 +231,33 @@ const KatalogDiagnosa = ({ dataPenyakit = [], refreshData }) => {
     });
 
     const dmftCalculated = {};
-    Object.entries(dmftByPuskesmas).forEach(([puskesmas, data]) => {
-      const avgKaries = data.total_karies / data.total_pasien;
-      const avgHilang = data.total_hilang / data.total_pasien;
-      const avgTambal = data.total_tambal / data.total_pasien;
-      const dmftIndex = avgKaries + avgHilang + avgTambal;
+    
+    Object.keys(dmftByPuskesmas).forEach(puskesmas => {
+      const data = dmftByPuskesmas[puskesmas];
+      const avgD = data.total_pasien > 0 ? (data.total_karies / data.total_pasien).toFixed(1) : 0;
+      const avgM = data.total_pasien > 0 ? (data.total_hilang / data.total_pasien).toFixed(1) : 0;
+      const avgF = data.total_pasien > 0 ? (data.total_tambal / data.total_pasien).toFixed(1) : 0;
+      const dmftIndex = (parseFloat(avgD) + parseFloat(avgM) + parseFloat(avgF)).toFixed(1);
       
-      let kategori = 'Normal';
-      if (dmftIndex < 1.2) kategori = 'Sangat Rendah';
-      else if (dmftIndex < 2.7) kategori = 'Rendah';
-      else if (dmftIndex < 4.5) kategori = 'Sedang';
-      else if (dmftIndex < 6.6) kategori = 'Tinggi';
-      else kategori = 'Sangat Tinggi';
-
+      let kategori = 'Sangat Rendah';
+      if (dmftIndex >= 6.6) kategori = 'Sangat Tinggi';
+      else if (dmftIndex >= 4.5) kategori = 'Tinggi';
+      else if (dmftIndex >= 2.7) kategori = 'Sedang';
+      else if (dmftIndex >= 1.2) kategori = 'Rendah';
+      
       dmftCalculated[puskesmas] = {
-        dmft_index: dmftIndex,
-        kategori: kategori,
+        dmft_index: parseFloat(dmftIndex),
+        decayed: parseFloat(avgD),
+        missing: parseFloat(avgM),
+        filled: parseFloat(avgF),
         jumlah_pasien: data.total_pasien,
-        decayed: avgKaries,
-        missing: avgHilang,
-        filled: avgTambal
+        kategori: kategori
       };
     });
-
+    
+    setDmftData(dmftCalculated);
+    
     if (Object.keys(dmftCalculated).length > 0) {
-      setDmftData(dmftCalculated);
-      
       // Update rekomendasi
       let wilayahTerbaik = "";
       let dmftTerendah = 999;
@@ -288,7 +270,23 @@ const KatalogDiagnosa = ({ dataPenyakit = [], refreshData }) => {
       
       setRekomendasiWilayah(`${wilayahTerbaik} memiliki indeks DMF-T terendah (${dmftTerendah.toFixed(2)}) - Model program terbaik`);
     }
-  };
+  }, []);
+  
+  // FUNGSI BARU: Load Data Pemeriksaan dari LocalStorage
+  const loadDataPemeriksaan = useCallback(() => {
+    try {
+      const storedData = localStorage.getItem('dataPemeriksaanCKG');
+      if (storedData) {
+        const parsed = JSON.parse(storedData);
+        setDataPemeriksaan(parsed);
+        
+        // Update DMF-T data berdasarkan data pemeriksaan real
+        updateDMFTFromPemeriksaan(parsed);
+      }
+    } catch (error) {
+      console.error("Gagal memuat data pemeriksaan dari localStorage:", error);
+    }
+  }, [updateDMFTFromPemeriksaan]);
 
   // FUNGSI BARU: Validasi NIK (Cek Duplikasi)
   const validateNIK = (nik) => {
@@ -664,9 +662,9 @@ const KatalogDiagnosa = ({ dataPenyakit = [], refreshData }) => {
 
   // Memuat data DMF-T, Program Intervensi, dan Aktivitas Tim secara berkala
   useEffect(() => {
-    fetchDMFTData();
-    fetchProgramIntervensi();
-    fetchAktivitasTim();
+    fetchDMFTData(); // Load data DMF-T
+    fetchProgramIntervensi(); // Load program intervensi
+    fetchAktivitasTim(); // Load aktivitas tim
     loadDataPemeriksaan(); // Load data pemeriksaan dari localStorage
     
     const intervalDMFT = setInterval(fetchDMFTData, 10000); // Realtime update tiap 10 detik
@@ -678,7 +676,7 @@ const KatalogDiagnosa = ({ dataPenyakit = [], refreshData }) => {
       clearInterval(intervalProgram);
       clearInterval(intervalAktivitas);
     };
-  }, []);
+  }, [loadDataPemeriksaan]);
 
   // LOGIKA FILTER DAN PENCARIAN TERPADU: Menyaring berdasarkan tab filter terpilih kemudian mencocokkan kata kunci
   const filteredPenyakit = dataPenyakit.filter(p => {

@@ -4,10 +4,11 @@ import {
   LineChart, Line, Cell, PieChart, Pie 
 } from 'recharts';
 import { 
-  Activity, Users, ClipboardCheck, Clock, 
-  ShieldAlert, TrendingUp, Hospital, ArrowUpRight,
-  Filter, RefreshCw, FileText, HeartPulse, BedDouble, MapPin
+  Activity, Users, 
+  ShieldAlert, TrendingUp, Hospital,
+  Filter, RefreshCw, FileText, HeartPulse, BedDouble, MapPin, FileDown
 } from 'lucide-react';
+import { exportToExcel } from '../../utils/excelHelper';
 
 const StatistikAdmin = ({ dataPasien = [], daftarKecamatan = [], refreshData, loading }) => {
   // State untuk kontrol filter wilayah asal rujukan puskesmas
@@ -129,6 +130,29 @@ const StatistikAdmin = ({ dataPasien = [], daftarKecamatan = [], refreshData, lo
     "Pilangkenceng", "Saradan", "Sawahan", "Wonoasri", "Wungu"
   ];
 
+  // --- FUNGSI EXPORT STATISTIK ---
+  const handleExportStatistik = () => {
+    const exportData = filteredData.map((p, idx) => ({
+      No: idx + 1,
+      'Nama Pasien': p.nama,
+      'NIK': p.nik || '-',
+      'Umur': p.umur,
+      'Gol. Darah': p.gol_darah,
+      'Tinggi (cm)': p.tinggi || '-',
+      'Berat (kg)': p.berat || '-',
+      'IMT': p.imt_skor || '-',
+      'Suhu (°C)': p.suhu || '-',
+      'Tekanan Darah': p.tensi || '-',
+      'Gula Darah': p.gula_darah || '-',
+      'Wilayah Kecamatan': p.wilayah_id,
+      'Diagnosa': p.penyakit_id,
+      'Status Medis': p.status,
+      'Bangsal/Kamar': p.kamar || '-',
+      'Tanggal Input': p.tanggal_input
+    }));
+    exportToExcel(exportData, `Statistik_Monitoring_${filterKecamatan}`);
+  };
+
   return (
     <div className="p-8 space-y-8 bg-slate-50 antialiased min-h-screen">
       
@@ -156,6 +180,15 @@ const StatistikAdmin = ({ dataPasien = [], daftarKecamatan = [], refreshData, lo
               ))}
             </select>
           </div>
+
+          <button
+            onClick={handleExportStatistik}
+            className="p-3 bg-emerald-50 text-emerald-700 border border-emerald-100 rounded-2xl shadow-sm hover:bg-emerald-100 transition-all flex items-center gap-2 text-xs font-bold"
+            title="Export Statistik ke Excel"
+          >
+            <FileDown size={15} />
+            <span>Export</span>
+          </button>
 
           {refreshData && (
             <button 
