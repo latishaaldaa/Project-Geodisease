@@ -3,10 +3,6 @@ from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 import os
-from dotenv import load_dotenv
-
-# Load environment variables
-load_dotenv()
 
 app = Flask(__name__)
 
@@ -24,10 +20,8 @@ CORS(app, resources={
     }
 })
 
-# Konfigurasi Database - Gunakan environment variable untuk production
-basedir = os.path.abspath(os.path.dirname(__file__))
-DATABASE_URL = os.getenv('DATABASE_URL', 'sqlite:///' + os.path.join(basedir, 'ckg_database.db'))
-app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URL
+# Konfigurasi Database SQLite untuk Vercel (gunakan /tmp)
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////tmp/ckg_database.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
@@ -777,7 +771,11 @@ def init_database():
             print("     - User: user@geodisease.com / user123")
             print("     - Tim Kesehatan: tim@geodisease.com / tim123")
 
-if __name__ == '__main__':
+# Inisialisasi database saat pertama kali dijalankan
+with app.app_context():
     init_database()
+
+# Untuk testing lokal
+if __name__ == '__main__':
     print("[RUNNING] Server CKG Backend berjalan di http://127.0.0.1:5000")
     app.run(debug=True, host='127.0.0.1', port=5000)

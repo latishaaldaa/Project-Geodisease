@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: 'https://api.geodisease-madiun.go.id/v1', // Ganti dengan URL API-mu
+  baseURL: process.env.REACT_APP_API_URL || 'https://api-geodesease.tifpsdku.com',
   headers: {
     'Content-Type': 'application/json',
   },
